@@ -110,48 +110,52 @@ if __name__ == "__main__":
     parser.add_argument('--hipp', '--HIPP', '--Hipp', '--HIPPARCOS', '--Hipparcos', '--hipparcos', '--hip', '--HIP', '--Hip', action='store_true')
     parser.add_argument('--hd', '--HD', '--Hd', action='store_true')
     # this argument specifies that multiple catalogues are provided in the input file
-    parser.add_argument('--multi_cat', '--MULTICAT', '--MultiCat', action='store_true')
+    parser.add_argument('--multi_cat', '--MULTI_CAT', '--Multi_Cat', '--multicat', '--MULTICAT', '--MultiCat', action='store_true')
     
     # Optional flag that specifies using DR5 observation timeline
     parser.add_argument('--dr5', '--DR5', '--Dr5', action='store_true')
 
-    # # Prints out the args for debugging purposes
-    # args = parser.parse_args()
-    # print("Arguments parsed:")
-    # print("Gaia:", args.gaiadr3)
-    # print("TIC:", args.tic)
-    # print("Hipparcos:", args.hipp)
-    # print("Henry Draper:", args.hd)
-    # print("DR5:", args.dr5)
+    # Collect the parsed arguments
+    args = parser.parse_args()
+
+    # Prints out the args for debugging purposes
+    print("Arguments parsed:")
+    print("Gaia:", args.gaiadr3)
+    print("TIC:", args.tic)
+    print("Hipparcos:", args.hipp)
+    print("Henry Draper:", args.hd)
+    print("Multiple Categories: ", args.multi_cat)
+    print("DR5:", args.dr5)
 
     ## 1) Interpret the command line arguments to obtain planet IDs and the catalogue ID type
     planet_ids, cat_id_type = interpret_user_input()
 
     # Check if the multi_cat flag is set for the input file type
     if cat_id_type == '.csv' or cat_id_type == '.txt':
-        if sys.args.multi_cat:
+        if args.multi_cat:
             cat_id_type = 'multi_cat'
-        elif sys.args.gaiadr3:
+        elif args.gaiadr3:
             cat_id_type = 'gaia_dr3_id'
-        elif sys.args.tic:
+        elif args.tic:
             cat_id_type = 'tic_id'
-        elif sys.args.hipp:
+        elif args.hipp:
             cat_id_type = 'hip_name'
-        elif sys.args.hd:
+        elif args.hd:
             cat_id_type = 'hd_name'
+
+        # Call to the parse_file module to parse the file and prep the planet IDs for the Query module
 
     try:
         if cat_id_type is None:
-            # Check flags for a catalogue type
-            if '--gaiadr3' in sys.argv or '--GAIADR3' in sys.argv or '--GaiaDR3' in sys.argv:
+            if args.gaiadr3:
                 cat_id_type = 'gaia_dr3_id'
-            elif '--tic' in sys.argv or '--TIC' in sys.argv or '--Tic' in sys.argv:
+            elif args.tic:
                 cat_id_type = 'tic_id'
-            elif '--hipp' in sys.argv or '--HIPP' in sys.argv or '--Hipp' in sys.argv or '--HIPPARCOS' in sys.argv or '--Hipparcos' in sys.argv or '--hipparcos' in sys.argv or '--hip' in sys.argv or '--HIP' in sys.argv or '--Hip' in sys.argv:
+            elif args.hipp:
                 cat_id_type = 'hip_name'
-            elif '--hd' in sys.argv or '--HD' in sys.argv or '--Hd' in sys.argv:
+            elif args.hd:
                 cat_id_type = 'hd_name'
-            elif '--multi_cat' in sys.argv:
+            elif args.multi_cat:
                 cat_id_type = 'multi_cat'
             else:
                 raise ValueError("No catalogue type specified")

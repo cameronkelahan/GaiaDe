@@ -1,2 +1,5 @@
-*.txt
 *.csv
+*.npy
+*.pdf
+*.pyc
+*.txt

@@ -91,7 +91,7 @@ def plot_snr_1_grid(semi_major_axis_1D_array, planet_masses_1D_array, grid, titl
     )
     
     if known_planets:
-        print("ADDING A PLANET")
+        # print("ADDING A PLANET")
         planets_outside_bounds = []
         for (a_au, m_jup) in known_planets:
             if a_au < semi_major_axis_1D_array.min() or a_au > semi_major_axis_1D_array.max():

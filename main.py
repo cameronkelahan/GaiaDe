@@ -53,22 +53,8 @@ def interpret_user_input():
         # Parse the file to get the planet IDs and set the cat_id_type
         planet_ids_df = pd.read_csv(file_path, names=['ID'], header=None, comment='#', skip_blank_lines=True)
         print("PLANET IDS DF FROM FILE: \n", planet_ids_df)
-        print(planet_ids_df.info())
-
-        print("datatype of [0] entry: ", type(planet_ids_df.iloc[0,0]))
-        
-        # print("BEFORE ADDING CAT ID TYPE: \n", planet_ids_df)
-        # planet_ids_df["cat_id_type"] = "Unknown"
-        # print("AFTER SETTING CAT ID TYPE COLUMN TO UNKNOWN: \n", planet_ids_df)
-        # planet_ids_df.loc[planet_ids_df["ID"].str.startswith("Gaia DR3"), "cat_id_type"] = "gaia_dr3_id"
-        # planet_ids_df.loc[planet_ids_df["ID"].str.startswith("TIC"), "cat_id_type"] = "tic_id"
-        # planet_ids_df.loc[planet_ids_df["ID"].str.startswith("HIP"), "cat_id_type"] = "hip_name"
-        # planet_ids_df.loc[planet_ids_df["ID"].str.startswith("HD"), "cat_id_type"] = "hd_name"
-
-        # print("AFTER ADDING CAT ID TYPE: \n", planet_ids_df)
             
         print(f"Read {len(planet_ids_df)} planet IDs from file {file_path}")
-        # print(planet_ids)
     
     # If there is no file extension found, assume direct input of one planet ID
     else:
@@ -99,50 +85,7 @@ def interpret_user_input():
             id_string += arg + " "
 
         planet_ids_df = pd.DataFrame({"ID": [id_string.strip()]})
-        print(planet_ids_df)
 
-        # # Check what type of ID is being input based on the the user input
-        # # If a full ID is given, look for the catalogue acronym in the input
-        # try:
-        #     if sys.argv[1] == "Gaia" and sys.argv[2] == "DR3":
-        #         int(sys.argv[3])
-        #         # add a row to the dataframe with the planet ID and cat_id_type
-        #         planet_ids_df = pd.DataFrame({'ID': ['Gaia DR3 ' + sys.argv[3]], 'cat_id_type': ['gaia_dr3_id']})
-        #         print("PLANET IDS DF FROM DIRECT INPUT: \n", planet_ids_df)
-        #         # planet_ids = sys.argv[3]
-        #         # cat_id_type = 'gaia_dr3_id'
-        #     elif sys.argv[1] == "TIC":
-        #         int(sys.argv[2])
-        #         planet_ids_df = pd.DataFrame({'ID': ['TIC ' + sys.argv[2]], 'cat_id_type': ['tic_id']})
-        #         print("PLANET IDS DF FROM DIRECT INPUT: \n", planet_ids_df)
-        #         # planet_ids = sys.argv[2]
-        #         # cat_id_type = 'tic_id'
-        #     elif sys.argv[1] == "HIP":
-        #         int(sys.argv[2])
-        #         planet_ids_df = pd.DataFrame({'ID': ['HIP ' + sys.argv[2]], 'cat_id_type': ['hip_name']})
-        #         print("PLANET IDS DF FROM DIRECT INPUT: \n", planet_ids_df)
-        #         # planet_ids = sys.argv[2]
-        #         # cat_id_type = 'hip_name'
-        #     elif sys.argv[1] == "HD":
-        #         int(sys.argv[2])
-        #         planet_ids_df = pd.DataFrame({'ID': ['HD ' + sys.argv[2]], 'cat_id_type': ['hd_name']})
-        #         print("PLANET IDS DF FROM DIRECT INPUT: \n", planet_ids_df)
-        #         # planet_ids = sys.argv[2]
-        #         # cat_id_type = 'hd_name'
-            
-        #     # If only a single integer is given, assume it's just the number part of an ID and the user will specify the catalogue with a flag
-        #     elif isinstance(int(sys.argv[1]),int):
-        #         if len(sys.argv) < 3:
-        #             raise ValueError("Not enough arguments provided")
-        #         int(sys.argv[1])
-        #         planet_ids_df = pd.DataFrame({'ID': [sys.argv[1]], 'cat_id_type': None})
-        #         print("PLANET IDS DF: ", planet_ids_df)
-        #     else:
-        #         raise ValueError("Invalid input format")
-        # except ValueError:
-        #     print("INPUT ERROR")
-        #     print(USAGE_ERROR_MESSAGE)
-        #     sys.exit(1)
     return planet_ids_df, cat_id_type
 
 def validate_catalog_input():
@@ -189,12 +132,6 @@ if __name__ == "__main__":
     # Collect the parsed arguments
     args = parser.parse_args()
 
-    # Prints out the args for debugging purposes
-    print("Arguments parsed:")
-    print("DR5:", args.dr5)
-    print("Load file:", args.load_file)
-    print("")
-
     # If the user has specified to load a previous query result from a .npy file, load
     #   the file instead of querying
     if args.load_file:
@@ -226,12 +163,8 @@ if __name__ == "__main__":
             print("Error determining ID type. Please ensure you provide a valid ID or use the appropriate flag.")
             print(USAGE_ERROR_MESSAGE)
             sys.exit(1)
-        
-        print("FINAL PLANET IDS DF TO BE USED IN QUERY: \n", planet_ids)
 
         returned_query = query.gaia_query(planet_ids, data_release='DR5' if args.dr5 else 'DR4')
-        print("Returned query data: \n", returned_query)
-        print(returned_query.info())
 
         # QUERY QUALITY CHECKS
         # If distance is missing, check if parallax is viable (S/N > 10) and us that to estimate distance

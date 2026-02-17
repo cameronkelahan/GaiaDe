@@ -98,7 +98,6 @@ def querySimbad(fromIDs, toID="Gaia DR3"):
     customSimbad.add_votable_fields("ids")
 
     result = customSimbad.query_objects(fromIDs)
-    # print(result)
 
     if result is None:
         return []
@@ -106,7 +105,6 @@ def querySimbad(fromIDs, toID="Gaia DR3"):
     dr3_ids = []
 
     for row in result:
-        print(row)
         ids_field = row["ids"]
 
         if isinstance(ids_field, bytes):
@@ -140,10 +138,11 @@ def gaia_query(planet_ids, data_release):
         print("RESULT: ", gaiaDR3IDs)
     else:
         print("not found")
+        # TO DO: Error handling??
 
     sql_form_gaia_dr3_ids = sql_string_list(gaiaDR3IDs)
 
-    print("SQL formatted Gaia DR3 IDs for query: ", sql_form_gaia_dr3_ids)
+    # print("SQL formatted Gaia DR3 IDs for query: ", sql_form_gaia_dr3_ids)
 
     query = f'''SELECT gs.source_id, gs.source_id, gs.parallax, gs.parallax_error, gs.distance_gspphot,
                         aps.distance_gspphot_marcs, ap.distance_gspphot,

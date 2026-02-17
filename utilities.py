@@ -220,120 +220,8 @@ def snr_grid(alpha_grid, gaia_mag):
 # plt.savefig('test_plots/astrometric_signature_grid.png', dpi=600)
 # # plt.show()
 
-# # Plot the SNR_1 grid with the SNR 1 value as a color bar, the x axis as period, and y axis as mass
-# def plot_snr_1_grid(grid, title_suffix, star_name, g_magnitude, distance_pc, stellar_mass_solar,
-#                     known_planets=None):
-#     fig, ax = plt.subplots(figsize=(10, 6))
-#     vmin_snr = grid[grid > 0].min()
-#     vmax_snr = grid.max()
-
-#     # Set these as the bottom x-axis ticks
-#     ax.set_xlabel("Semi-Major Axis [AU]", fontsize=12)
-#     ax.set_xscale("log")
-#     ax.set_yscale("log")
-#     ax.set_ylabel(f"Planet Mass [$M_J$]", fontsize=12)
-
-#     secax = ax.secondary_xaxis('top', functions=(a_to_period, period_to_a))
-#     secax.set_xlabel('Orbital Period [days]')
-
-#     levels_snr = np.logspace(
-#         np.log10(vmin_snr),
-#         np.log10(vmax_snr),
-#         100
-#     )
-
-#     contourplt_snr = ax.contourf(
-#         a_values,
-#         planet_masses,
-#         grid,
-#         levels=levels_snr,
-#         cmap='viridis',
-#         norm=colors.LogNorm(
-#             vmin=vmin_snr,
-#             vmax=vmax_snr
-#         )
-#     )
-
-#     cbar = fig.colorbar(contourplt_snr, ax=ax)
-#     cbar.set_label(f'$SNR_1$ ({title_suffix}) (mas)', fontsize=12)
-
-#     # Force ticks at powers of 10
-#     cbar.locator = ticker.LogLocator(base=10.0)
-#     cbar.formatter = ticker.LogFormatterMathtext(base=10.0)
-#     cbar.update_ticks()
-
-#     # add a straight line where SNR1 = 1
-#     plt.contour(
-#         a_values,
-#         planet_masses,
-#         grid,
-#         levels=[1],
-#         colors='red',
-#         linewidths=2,
-#         linestyles='dashed'
-#     )
-
-#     # Create a proxy line for the legend
-#     snr1_proxy = Line2D(
-#         [0], [0],
-#         color='red',
-#         linestyle='dashed',
-#         linewidth=2,
-#         label=r'SNR$_1$ = 1'
-#     )
-
-#     # Add legend for the SNR_1=1 line
-#     fig.legend(
-#         handles=[snr1_proxy],
-#         loc='upper left',
-#         bbox_to_anchor=(0.12, 0.88),  # adjust if needed
-#         frameon=True,
-#         fontsize=10
-#     )
-    
-#     # if known_planets:
-#     #     planets_outside_bounds = []
-#     #     for (a_au, m_jup) in known_planets:
-#     #         if a_au < a_values.min() or a_au > a_values.max():
-#     #             planets_outside_bounds.append((a_au, m_jup))
-#     #             continue
-#     #         if m_jup < planet_masses.min() or m_jup > planet_masses.max():
-#     #             planets_outside_bounds.append((a_au, m_jup))
-#     #             continue
-#     #         plt.plot(
-#     #             a_au,
-#     #             m_jup,
-#     #             marker='o',
-#     #             color='white',
-#     #             markersize=8,
-#     #             markeredgecolor='black',
-#     #             label='Known Planet'
-#     #         )
-#     #     plt.legend(loc='upper right')
-#     #     if len(planets_outside_bounds) > 0:
-#     #         print("Known planets outside plot bounds (not shown):", planets_outside_bounds)
-
-#     fig.suptitle(
-#         f'{title_suffix} $SNR_1$ Grid: {star_name} | '
-#         f'G_mag={g_magnitude} | Dist={distance_pc} pc | '
-#         rf'$M_\star$={stellar_mass_solar} $M_\odot$',
-#         fontsize=12,
-#         x=0.5,
-#         ha='center'
-#     )
-
-#     plt.savefig(f'test_plots/{star_name}/{title_suffix}_snr1_grid.pdf', dpi=600)
-#     plt.savefig(f'test_plots/{star_name}/{title_suffix}_snr1_grid.png', dpi=600)
-#     # plt.show()
-
-# # known_planets = [(1.138, 1.688), (5.04, 1.43)] # (AU, M_Jup) for GJ 317 b and c
-# # known_planets = [(0.349, 3.02),(1.152, 9.27)] # (AU, M_jup) for TOI-4600 b and c
-
-# # plot_snr_1_grid(SNR_1_grid_actual, 'DR3 Observed', known_planets)
-# # plot_snr_1_grid(SNR_1_grid_theoretical, 'Theoretical', known_planets)
-
 # ## TO DO:
-# # - Remove dashed line showig SNR of 1
+# # - Remove dashed line showing SNR of 1 ??
 # # - Match Lammers et al. paper's AU limit (0.1 AU lower limit)
 # # - Double check the calculations
 # #  - Plot the planets from Wu 2026 Cold Jupiters paper
@@ -343,8 +231,7 @@ def snr_grid(alpha_grid, gaia_mag):
 # # OVERALL
 # # - Make 3 types of plots
 # #  1) Astrometric signature color plot
-# #  2) SNR1 color plot
+# #  2) SNR1 color plot COMPLETE
 # #  3) SNR1 contour plot with number of observations considered (GOST)
+# #     - Convolution with other plot considering observation time for astrometric fit
 # # Remove all hard-coded values
-# # Implement Gaia database query
-# # Add flag for --st_mass for a user to specify (would overwrite any queryed value)

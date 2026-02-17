@@ -1,4 +1,4 @@
-# The GaiaDe Tool: Gaia Detection Tool
+# The GaiaDe (Guide) Tool: Gaia Detection Tool
 Input a known star via a catalogue ID (Gai DR3, TIC, HIP, HD) to produce a sensitivity map displaying Gaia's estimated ability to detect companions across a range of masses and orbital semi-major axes.
 
 ## Set-Up:

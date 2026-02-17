@@ -28,7 +28,7 @@ python main.py example_list.csv
 - ```--dr5``` is used to change the observing timeline from the default of DR4 (5.5 years) to DR5 (10.5 years)
     - This changes the range of considered AU (period) values
 
-## Functionality:
+## Functionality:
 - This tool accepts single star targets or a file with many targets (.csv or .txt)
 - Accepted catalogue IDs are Gaia DR3, TIC, HIP, and HD
     - Others may work as well but have not been tested; the tool queries Simbad for the given ID

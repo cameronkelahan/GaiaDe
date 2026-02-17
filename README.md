@@ -1,7 +1,17 @@
-# GaiaDetect
-Input a known exoplanet via its Gaia-ID to produce a heat map displaying Gaia's sensitivity to detect that planet across possible masses of the planet and orbital semi-major axes.
+# The GaiaDe Tool: Gaia Detection Tool
+Input a known star via a catalogue ID (Gai DR3, TIC, HIP, HD) to produce a sensitivity map displaying Gaia's estimated ability to detect companions across a range of masses and orbital semi-major axes.
 
-Functionality:
-- Input Gaia-ID (or Tic-ID?) of a known exoplanet
-    - Accepts a single ID, a list of ID's, or a .csv or .txt fole with a list of IDs
-- produce sensitivity plot of gaia's ability to detect said planet across a 2D space defined by the planets mass and semi-major axis (since these are most likely not known)
+## Set-Up:
+Run the following to install necessary modules (using a venv is recommended):
+
+```
+pip install -r requirements.txt
+```
+
+## Functionality:
+- This tool accepts single star targets or a file with many targets (.csv or .txt)
+- Accepted catalogue IDs are Gaia DR3, TIC, HIP, and HD
+    - Others may work as well but have not been tested; The tool queries Simbad for the given ID
+- Produce sensitivity plot of gaia's ability to detect a companion around the given star(s)
+    - Creates a contour plot in 2D space defined by the companions mass and semi-major axis
+    - Allows the user to understand what type of companions would be detectable around the given star(s)

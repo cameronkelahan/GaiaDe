@@ -1,5 +1,12 @@
 *.csv
 *.npy
 *.pdf
+*.pkl
+*.png
 *.pyc
 *.txt
+./plots
+./test_plots
+.vscode
+
+!requirements.txt

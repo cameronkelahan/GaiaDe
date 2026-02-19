@@ -87,7 +87,7 @@ def exoplanet_query(planet_ids, data_release):
 
     return result_df
 
-def querySimbad(fromIDs, toID="Gaia DR3"):
+def querySimbad(IDs):
     """
     Batch query SIMBAD and return mapping of
     {input_id: matched_catalog_id}
@@ -97,7 +97,7 @@ def querySimbad(fromIDs, toID="Gaia DR3"):
     customSimbad._VOTABLE_FIELDS = []
     customSimbad.add_votable_fields("ids")
 
-    result = customSimbad.query_objects(fromIDs)
+    result = customSimbad.query_objects(IDs)
 
     if result is None:
         return []

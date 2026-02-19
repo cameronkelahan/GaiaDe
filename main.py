@@ -164,7 +164,11 @@ if __name__ == "__main__":
             print(USAGE_ERROR_MESSAGE)
             sys.exit(1)
 
-        returned_query = query.gaia_query(planet_ids, data_release='DR5' if args.dr5 else 'DR4')
+        try:
+            returned_query = query.gaia_query(planet_ids, data_release='DR5' if args.dr5 else 'DR4')
+        except ValueError:
+            print(USAGE_ERROR_MESSAGE)
+            sys.exit(1)
 
         # QUERY QUALITY CHECKS
         # If distance is missing, check if parallax is viable (S/N > 10) and us that to estimate distance

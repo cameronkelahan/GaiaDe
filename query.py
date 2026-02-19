@@ -105,7 +105,7 @@ def querySimbad(IDs):
     dr3_ids = []
 
     for row in result:
-        ids_field = row["ids"]
+        ids_field = row["IDS"]
 
         if isinstance(ids_field, bytes):
             ids_field = ids_field.decode()
@@ -127,23 +127,30 @@ def gaia_query(planet_ids, data_release):
         # Unit in days
         orb_period = 1461  # Example value for DR4
 
-    # Grouo the ID column into a list of IDs for the Simbad query
+    # Group the ID column into a list of IDs for the Simbad query
     id_list = planet_ids['ID'].tolist()
 
     # Query Simbad to get Gaia DR3 IDs for the provided planet IDs (if they are not already Gaia DR3 IDs)
     #   This is necessary as we are going to query the Gaia archive, which relies on Gaia IDs
+
     gaiaDR3IDs = querySimbad(id_list)
 
-    if gaiaDR3IDs is not None:
-        print("RESULT: ", gaiaDR3IDs)
+    if len(gaiaDR3IDs) == 0:
+        print("\nERROR:  Simbad returned an empty query.")
+        print("Double check the given IDs.")
+        raise ValueError
+    if len(gaiaDR3IDs) < len(id_list):
+        print("\nERROR:  Simbad returned fewer DR3 IDs than the given number of inputs.")
+        print("Double check the given IDs.")
+        raise ValueError
     else:
-        print("not found")
-        # TO DO: Error handling??
+        print("Results: ", gaiaDR3IDs)
 
     sql_form_gaia_dr3_ids = sql_string_list(gaiaDR3IDs)
 
     # print("SQL formatted Gaia DR3 IDs for query: ", sql_form_gaia_dr3_ids)
 
+    print("ABOUT TO QUERY")
     query = f'''SELECT gs.source_id, gs.source_id, gs.parallax, gs.parallax_error, gs.distance_gspphot,
                         aps.distance_gspphot_marcs, ap.distance_gspphot,
                         gs.astrometric_n_obs_al,
@@ -157,9 +164,11 @@ def gaia_query(planet_ids, data_release):
                     ON gs.source_id = aps.source_id
                 WHERE gs.source_id IN ({sql_form_gaia_dr3_ids})'''
     job = Gaia.launch_job_async(query)
+    print("JOB: ", job)
     results = job.get_results()
 
     # If results are null or failed, use backup Gaia database; print message
+    
 
     results_df = results.to_pandas()
 

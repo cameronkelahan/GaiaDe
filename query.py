@@ -151,24 +151,27 @@ def gaia_query(planet_ids, data_release):
     # print("SQL formatted Gaia DR3 IDs for query: ", sql_form_gaia_dr3_ids)
 
     print("ABOUT TO QUERY")
-    query = f'''SELECT gs.source_id, gs.source_id, gs.parallax, gs.parallax_error, gs.distance_gspphot,
-                        aps.distance_gspphot_marcs, ap.distance_gspphot,
-                        gs.astrometric_n_obs_al,
-                        gs.astrometric_n_obs_ac, gs.astrometric_n_good_obs_al, gs.astrometric_n_bad_obs_al,
-                        gs.phot_g_mean_mag, gs.teff_gspphot, gs.logg_gspphot, gs.mh_gspphot, gs.astrometric_matched_transits,
-                        ap.mass_flame, ap.radius_flame
+    query = f'''SELECT gs.source_id, gs.ra, gs.ra_error, gs.dec, gs.dec_error,
+                        gs.parallax, gs.parallax_error, gs.pm, gs.pmra, gs.pmra_error,
+                        gs.pmdec, gs.pmdec_error, gs.distance_gspphot, gs.distance_gspphot_lower,
+                        gs.distance_gspphot_upper, gs.astrometric_n_obs_al, gs.astrometric_n_obs_ac,
+                        gs.astrometric_n_good_obs_al, gs.astrometric_n_bad_obs_al, gs.matched_transits,
+                        gs.phot_g_mean_mag, gs.phot_bp_mean_mag, gs.phot_rp_mean_mag, gs.teff_gspphot,
+                        gs.teff_gspphot_lower, gs.teff_gspphot_upper, gs.logg_gspphot,
+                        gs.logg_gspphot_lower, gs.logg_gspphot_upper, gs.mh_gspphot, gs.mh_gspphot_lower,
+                        gs.mh_gspphot_upper, gs.astrometric_matched_transits, ap.mass_flame,
+                        ap.mass_flame_lower, ap.mass_flame_upper, ap.radius_flame, ap.radius_flame_lower,
+                        ap.radius_flame_upper
                 FROM gaiadr3.gaia_source AS gs
                 LEFT JOIN gaiadr3.astrophysical_parameters AS ap
                     ON gs.source_id = ap.source_id
-                LEFT JOIN gaiadr3.astrophysical_parameters_supp AS aps
-                    ON gs.source_id = aps.source_id
                 WHERE gs.source_id IN ({sql_form_gaia_dr3_ids})'''
     job = Gaia.launch_job_async(query)
     print("JOB: ", job)
     results = job.get_results()
 
     # If results are null or failed, use backup Gaia database; print message
-    
+    # TO DO
 
     results_df = results.to_pandas()
 

@@ -274,11 +274,3 @@ if __name__ == "__main__":
                                   distance_pc=star.distance_gspphot,
                                   stellar_mass_solar=star.mass_flame,
                                   known_planets=known_planets)
-    
-
-    # # make fake matrtices for testing
-    # snr_matrix = np.random.rand(10,10) * 10  # Random SNR values between 0 and 10
-    # planet_masses = np.logspace(-1, 2, 10)  # Planet masses from 0.1 to 100 Jupiter masses
-    # orbital_periods = np.logspace(0, 3, 10)  # Orbital periods from 1 to 1000 days
-
-    # plotting.plot_sensitivity(snr_matrix, planet_masses, orbital_periods, title="Test Sensitivity Plot")

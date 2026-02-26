@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pyvo as vo
 import re
+import requests
 from astroquery.gaia import Gaia
 from astroquery.simbad import Simbad
 
@@ -155,25 +156,48 @@ def gaia_query(planet_ids, data_release):
     # print("SQL formatted Gaia DR3 IDs for query: ", sql_form_gaia_dr3_ids)
 
     print("ABOUT TO QUERY")
-    query = f'''SELECT gs.source_id, gs.ra, gs.ra_error, gs.dec, gs.dec_error,
-                        gs.parallax, gs.parallax_error, gs.pm, gs.pmra, gs.pmra_error,
-                        gs.pmdec, gs.pmdec_error, gs.distance_gspphot, gs.distance_gspphot_lower,
-                        gs.distance_gspphot_upper, gs.astrometric_n_obs_al,
-                        gs.astrometric_n_obs_ac, gs.astrometric_n_good_obs_al,
-                        gs.astrometric_n_bad_obs_al, gs.matched_transits, gs.phot_g_mean_mag,
-                        gs.phot_bp_mean_mag, gs.phot_rp_mean_mag, gs.teff_gspphot,
-                        gs.teff_gspphot_lower, gs.teff_gspphot_upper, gs.logg_gspphot,
-                        gs.logg_gspphot_lower, gs.logg_gspphot_upper, gs.mh_gspphot,
-                        gs.mh_gspphot_lower, gs.mh_gspphot_upper, gs.astrometric_matched_transits,
-                        gs.ag_gspphot, gs.ag_gspphot_lower, gs.ag_gspphot_upper,
-                        ap.mass_flame, ap.mass_flame_lower, ap.mass_flame_upper, ap.radius_flame,
-                        ap.radius_flame_lower, ap.radius_flame_upper
-                FROM gaiadr3.gaia_source AS gs
-                LEFT JOIN gaiadr3.astrophysical_parameters AS ap
-                    ON gs.source_id = ap.source_id
-                WHERE gs.source_id IN ({sql_form_gaia_dr3_ids})'''
-    job = Gaia.launch_job_async(query)
-    results = job.get_results()
+    try:
+        query = f'''SELECT gs.source_id, gs.ra, gs.ra_error, gs.dec, gs.dec_error,
+                            gs.parallax, gs.parallax_error, gs.pm, gs.pmra, gs.pmra_error,
+                            gs.pmdec, gs.pmdec_error, gs.distance_gspphot, gs.distance_gspphot_lower,
+                            gs.distance_gspphot_upper, gs.astrometric_n_obs_al,
+                            gs.astrometric_n_obs_ac, gs.astrometric_n_good_obs_al,
+                            gs.astrometric_n_bad_obs_al, gs.matched_transits, gs.phot_g_mean_mag,
+                            gs.phot_bp_mean_mag, gs.phot_rp_mean_mag, gs.teff_gspphot,
+                            gs.teff_gspphot_lower, gs.teff_gspphot_upper, gs.logg_gspphot,
+                            gs.logg_gspphot_lower, gs.logg_gspphot_upper, gs.mh_gspphot,
+                            gs.mh_gspphot_lower, gs.mh_gspphot_upper, gs.astrometric_matched_transits,
+                            gs.ag_gspphot, gs.ag_gspphot_lower, gs.ag_gspphot_upper,
+                            ap.mass_flame, ap.mass_flame_lower, ap.mass_flame_upper, ap.radius_flame,
+                            ap.radius_flame_lower, ap.radius_flame_upper
+                    FROM gaiadr3.gaia_source AS gs
+                    LEFT JOIN gaiadr3.astrophysical_parameters AS ap
+                        ON gs.source_id = ap.source_id
+                    WHERE gs.source_id IN ({sql_form_gaia_dr3_ids})'''
+        # raise requests.exceptions.HTTPError("Simulated HTTP error for testing backup query")
+        job = Gaia.launch_job_async(query)
+        results = job.get_results()
+        print(type(results))
+    except requests.exceptions.HTTPError:
+        print("\nERROR:  Gaia query failed with HTTPError.")
+        print("This may be due to a temporary issue with the Gaia archive or an invalid query.")
+        print("Please check the Gaia archive status and review the query for any potential issues.")
+
+        print("\nIn the mean time, attempting backup query to Gaia@AIP service...")
+        # Try backup database query if Gaia database is down
+        # For Gaia@AIP service; a backup if the gaia database is down
+        url = "https://gaia.aip.de/tap"
+        # token = 'Token <your-token>'
+        # Setup authorization
+        tap_session = requests.Session()
+        # tap_session.headers['Authorization'] = token
+        tap_service = vo.dal.TAPService(url, session=tap_session)
+        lang = "PostgreSQL"
+        TAP_results = tap_service.run_sync(query, language=lang)
+        results = TAP_results.to_table()
+        print('...DONE\n')
+        print(type(results))
+        print(results)
 
     # If results are null or failed, use backup Gaia database; print message
     # TO DO

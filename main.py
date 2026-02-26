@@ -100,8 +100,8 @@ def validate_catalog_input():
         if len(sys.argv) < 3:
             raise ValueError("Gaia must be followed by DR3.")
         
-        if sys.argv[2].upper() not in {"DR3"}:
-            raise ValueError("Gaia must be followed by DR3.")
+        if sys.argv[2].upper() not in {"DR3", "EDR3", "DR2"}:
+            raise ValueError("Gaia must be followed by DR2, EDR3, orDR3.")
 
         return
 

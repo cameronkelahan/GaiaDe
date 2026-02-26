@@ -94,7 +94,6 @@ def querySimbad(IDs):
     """
 
     customSimbad = Simbad()
-    customSimbad._VOTABLE_FIELDS = []
     customSimbad.add_votable_fields("ids")
 
     result = customSimbad.query_objects(IDs)
@@ -102,10 +101,15 @@ def querySimbad(IDs):
     if result is None:
         return []
 
+    print("Columns returned:", result.colnames)  # DEBUG LINE
+
     dr3_ids = []
 
+    if "ids" not in result.colnames:
+        raise RuntimeError(f"'ids' column missing. Columns: {result.colnames}")
+
     for row in result:
-        ids_field = row["IDS"]
+        ids_field = row["ids"]
 
         if isinstance(ids_field, bytes):
             ids_field = ids_field.decode()
@@ -154,20 +158,21 @@ def gaia_query(planet_ids, data_release):
     query = f'''SELECT gs.source_id, gs.ra, gs.ra_error, gs.dec, gs.dec_error,
                         gs.parallax, gs.parallax_error, gs.pm, gs.pmra, gs.pmra_error,
                         gs.pmdec, gs.pmdec_error, gs.distance_gspphot, gs.distance_gspphot_lower,
-                        gs.distance_gspphot_upper, gs.astrometric_n_obs_al, gs.astrometric_n_obs_ac,
-                        gs.astrometric_n_good_obs_al, gs.astrometric_n_bad_obs_al, gs.matched_transits,
-                        gs.phot_g_mean_mag, gs.phot_bp_mean_mag, gs.phot_rp_mean_mag, gs.teff_gspphot,
+                        gs.distance_gspphot_upper, gs.astrometric_n_obs_al,
+                        gs.astrometric_n_obs_ac, gs.astrometric_n_good_obs_al,
+                        gs.astrometric_n_bad_obs_al, gs.matched_transits, gs.phot_g_mean_mag,
+                        gs.phot_bp_mean_mag, gs.phot_rp_mean_mag, gs.teff_gspphot,
                         gs.teff_gspphot_lower, gs.teff_gspphot_upper, gs.logg_gspphot,
-                        gs.logg_gspphot_lower, gs.logg_gspphot_upper, gs.mh_gspphot, gs.mh_gspphot_lower,
-                        gs.mh_gspphot_upper, gs.astrometric_matched_transits, ap.mass_flame,
-                        ap.mass_flame_lower, ap.mass_flame_upper, ap.radius_flame, ap.radius_flame_lower,
-                        ap.radius_flame_upper
+                        gs.logg_gspphot_lower, gs.logg_gspphot_upper, gs.mh_gspphot,
+                        gs.mh_gspphot_lower, gs.mh_gspphot_upper, gs.astrometric_matched_transits,
+                        gs.ag_gspphot, gs.ag_gspphot_lower, gs.ag_gspphot_upper,
+                        ap.mass_flame, ap.mass_flame_lower, ap.mass_flame_upper, ap.radius_flame,
+                        ap.radius_flame_lower, ap.radius_flame_upper
                 FROM gaiadr3.gaia_source AS gs
                 LEFT JOIN gaiadr3.astrophysical_parameters AS ap
                     ON gs.source_id = ap.source_id
                 WHERE gs.source_id IN ({sql_form_gaia_dr3_ids})'''
     job = Gaia.launch_job_async(query)
-    print("JOB: ", job)
     results = job.get_results()
 
     # If results are null or failed, use backup Gaia database; print message

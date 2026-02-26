@@ -85,6 +85,22 @@ def snr_grid(alpha_grid, gaia_mag):
     snr_1_grid_actual  = alpha_grid / actual_dev_angle
     return snr_1_grid_theoretical, snr_1_grid_actual
 
+def estimate_stellar_mass(g_mag, bp_mag, rp_mag, distance):
+    # Placeholder function for estimating stellar mass based on Gaia photometry and distance
+    # This is a very rough estimate and should be replaced with a more accurate method
+    color = bp_mag - rp_mag
+    abs_g_mag = g_mag - 5 * np.log10(distance / 10)
+    
+    # if color < 0.5:
+    #     mass = 1.0  # Solar mass for blue stars
+    # elif color < 1.5:
+    #     mass = 0.7  # Sub-solar mass for intermediate stars
+    # else:
+    #     mass = 0.3  # Low mass for red stars
+    
+    return 1.0
+    
+
 # # JUST SET A SPECIFIC LIST OF AU TICKS TO ALWAYS USE FOR DR4 and DR5
 # # SOMETHING LIKE 0.01 to 3 for DR4?
 

@@ -171,11 +171,12 @@ if __name__ == "__main__":
             sys.exit(1)
 
         # QUERY QUALITY CHECKS
-        # If distance is missing, check if parallax is viable (S/N > 10) and us that to estimate distance
+        # If distance is missing, check if parallax is viable (S/N > 10) and use that to estimate distance
         returned_query["distance_estimated_flag"] = 0
         snr_parallax = returned_query['parallax'] / returned_query['parallax_error']
 
-        mask = (
+
+        distance_mask = (
             returned_query["distance_gspphot"].isna() &
             returned_query["parallax"].notna() &
             returned_query["parallax_error"].notna() &
@@ -183,21 +184,49 @@ if __name__ == "__main__":
             (snr_parallax >= 10)
         )
 
-        returned_query.loc[mask, "distance_gspphot"] = (
-            1000.0 / returned_query.loc[mask, "parallax"]
+        returned_query.loc[distance_mask, "distance_gspphot"] = (
+            (1000.0 / returned_query.loc[distance_mask, "parallax"])
+            .astype("float32")
         )
-        returned_query.loc[mask, "distance_estimated_flag"] = 1
-        print(f"Estimated distances for {mask.sum()} stars (parallax S/N >= 10).")
+        returned_query.loc[distance_mask, "distance_estimated_flag"] = 1
+        print(f"Estimated distances for {distance_mask.sum()} stars (parallax S/N >= 10).")
+        
+        # If stellar mass is missing, use color and abs mag to estimate stellar type and then mass (this is a very rough estimate and can be improved in the future by using isochrones or something similar)
+        #    - this is a very rough estimate and can be improved in the future
+        returned_query["st_mass_estimated_flag"] = 0
+        st_mass_mask = (
+            returned_query["mass_flame"].isna() &
+            returned_query["phot_g_mean_mag"].notna() &
+            returned_query["phot_bp_mean_mag"].notna() &
+            returned_query["phot_rp_mean_mag"].notna() &
+            returned_query["distance_gspphot"].notna()
+        )
+        returned_query.loc[st_mass_mask, "mass_flame"] = utilities.estimate_stellar_mass(
+            returned_query.loc[st_mass_mask, "phot_g_mean_mag"],
+            returned_query.loc[st_mass_mask, "phot_bp_mean_mag"],
+            returned_query.loc[st_mass_mask, "phot_rp_mean_mag"],
+            returned_query.loc[st_mass_mask, "distance_gspphot"]
+        )
+        returned_query.loc[st_mass_mask, "st_mass_estimated_flag"] = 1
+        print(f"Estimated stellar masses for {st_mass_mask.sum()} stars based on color and absolute magnitude.")
 
         # Find any rows with NaNs
-        nan_rows = returned_query[returned_query.isna().any(axis=1)]
-        missing_info = nan_rows.apply(lambda row: row.index[row.isna()].tolist(), axis=1)
-        nan_rows = nan_rows.copy()
-        nan_rows['missing_columns'] = missing_info
+        # Find rows with NaNs in mass_flame or distance_gspphot (the two most important parameters for the astrometric signature calculation) and print out which columns are missing for each row; then drop those rows for the rest of the analysis for now (but save them in a separate dataframe and print them out so we can see how many and which rows are being dropped and what info is missing for those rows)
+        nan_rows = returned_query[returned_query[['mass_flame', 'distance_gspphot']].isna().any(axis=1)]
+        missing_info = nan_rows.apply(lambda row: [col for col in ['mass_flame', 'distance_gspphot'] if pd.isna(row[col])], axis=1)
+        nan_rows = nan_rows.assign(missing_info=missing_info)
         # For now, just drop the rows that contain an NaN
-        clean_df = returned_query.drop(nan_rows.index)
+        clean_df = returned_query.dropna(subset=['mass_flame', 'distance_gspphot'])
 
-        print("ROWS WITH NaNs (DROPPED ROWS): \n", nan_rows)
+        # Print the nan_rows dataframe without the columns information after the analysis to avoid cluttering the output
+        if not nan_rows.empty:
+            print(f"\n{len(nan_rows)} rows contain NaN values in mass_flame or distance_gspphot and will be dropped from the analysis:")
+            print(nan_rows.drop(columns=['missing_info']))
+            print("\nThe following columns are missing for each of these rows:")
+            for index, row in nan_rows.iterrows():
+                print(f"Row {index}: Missing {row['missing_info']}")
+        else:
+            print("\nNo rows contain NaN values in mass_flame or distance_gspphot.")
 
         # Possible way to estimate distance if missing, before checking for NaN rows
         #    - may want to only do this for rows with a certain S/N for the parallax measurement (>10?)

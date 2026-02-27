@@ -16,8 +16,7 @@ import utilities
 USAGE_ERROR_MESSAGE = '''\nUsage: python main.py <planet_id> OR <planet_ID_list_filename> plus optional flags (see below)
 Example: python main.py Gaia DR3 123456789 OR python main.py planet_ids.txt --dr5
 Accepted file formats are .txt and .csv
-IDs are the whole ID and should include the acronym of the catalog. I.e. Gaia DR3 123456789 or TIC 123456
-Make sure to separate the catalog acronym from the ID with a space: i.e. TOI-1130 --> TOI 1130
+IDs are the whole ID and should include the acronym of the catalog. I.e. Gaia DR3 123456789, TIC 123456. TOI-2447
 If the star's ID has special characters in it, place the whole id in quotations: i.e. 'Cl* Melotte 25 S 123'
 Optional flags:
     --dr5      : Calculate based on DR5 observaton timeline (DR4 is default)
@@ -264,6 +263,7 @@ if __name__ == "__main__":
 
     # Thus begins the for loop iterationg through the queried stellar data
     # Contains the plotting functionality
+    print("PLOTTING...")
     for star in query_result_df.itertuples(index=False):
         
         semi_major_axis_1D_array = utilities.semi_maj_axis_conversion(period_conversion_for_sem_maj_calculation, star.mass_flame)

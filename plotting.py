@@ -131,3 +131,5 @@ def plot_snr_1_grid(semi_major_axis_1D_array, planet_masses_1D_array, grid, titl
     plt.savefig(f'plots/{star_name}/{title_suffix}_snr1_grid.pdf', dpi=600)
     plt.savefig(f'plots/{star_name}/{title_suffix}_snr1_grid.png', dpi=600)
     # plt.show()
+
+    plt.close()

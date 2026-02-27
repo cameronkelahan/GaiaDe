@@ -99,17 +99,17 @@ def querySimbad(IDs):
 
     result = customSimbad.query_objects(IDs)
 
+    # print("Columns returned:", result.colnames) # DEBUG LINE
+    # print("Result of SIMBAD query:", result) # DEBUG LINE
+
+    # Initialize mapping with None (assume not found)
+    id_map = {id_: None for id_ in IDs}
+
     if result is None:
-        return []
-
-    print("Columns returned:", result.colnames)  # DEBUG LINE
-
-    dr3_ids = []
-
-    if "ids" not in result.colnames:
-        raise RuntimeError(f"'ids' column missing. Columns: {result.colnames}")
-
+        return id_map
+    
     for row in result:
+        input_id = row["user_specified_id"].strip()
         ids_field = row["ids"]
 
         if isinstance(ids_field, bytes):
@@ -118,9 +118,9 @@ def querySimbad(IDs):
         match = re.search(r"Gaia DR3 (\d+)", ids_field)
 
         if match:
-            dr3_ids.append(match.group(1))
+            id_map[input_id] = match.group(1)
 
-    return dr3_ids
+    return id_map
 
 def gaia_query(planet_ids, data_release):
     if data_release == 'DR5':
@@ -138,22 +138,22 @@ def gaia_query(planet_ids, data_release):
     # Query Simbad to get Gaia DR3 IDs for the provided planet IDs (if they are not already Gaia DR3 IDs)
     #   This is necessary as we are going to query the Gaia archive, which relies on Gaia IDs
 
-    gaiaDR3IDs = querySimbad(id_list)
+    gaia_dr3_id_map = querySimbad(id_list)
 
-    if len(gaiaDR3IDs) == 0:
-        print("\nERROR:  Simbad returned an empty query.")
-        print("Double check the given IDs.")
-        raise ValueError
-    if len(gaiaDR3IDs) < len(id_list):
-        print("\nERROR:  Simbad returned fewer DR3 IDs than the given number of inputs.")
-        print("Double check the given IDs.")
-        raise ValueError
+    found = {k: v for k, v in gaia_dr3_id_map.items() if v is not None}
+    missing = [k for k, v in gaia_dr3_id_map.items() if v is None]
+
+    if missing:
+        print("\nERROR: Simbad did not return DR3 IDs for:")
+        for m in missing:
+            print(f"  - {m}")
+        print("Please Double check the above ID(s).")
+
+        raise ValueError("Some IDs were not found in SIMBAD.")
     else:
-        print("Results: ", gaiaDR3IDs)
+        print("Results: ", list(found.values()))
 
-    sql_form_gaia_dr3_ids = sql_string_list(gaiaDR3IDs)
-
-    # print("SQL formatted Gaia DR3 IDs for query: ", sql_form_gaia_dr3_ids)
+    sql_form_gaia_dr3_ids = sql_string_list(list(found.values()))
 
     print("ABOUT TO QUERY")
     try:

@@ -17,7 +17,8 @@ USAGE_ERROR_MESSAGE = '''\nUsage: python main.py <planet_id> OR <planet_ID_list_
 Example: python main.py Gaia DR3 123456789 OR python main.py planet_ids.txt --dr5
 Accepted file formats are .txt and .csv
 IDs are the whole ID and should include the acronym of the catalog. I.e. Gaia DR3 123456789 or TIC 123456
-Accepted catalougue acronyms are "Gaia DR3", "HD", "HIP", and "TIC"
+Make sure to separate the catalog acronym from the ID with a space: i.e. TOI-1130 --> TOI 1130
+If the star's ID has special characters in it, place the whole id in quotations: i.e. 'Cl* Melotte 25 S 123'
 Optional flags:
     --dr5      : Calculate based on DR5 observaton timeline (DR4 is default)
     --load_file: Load a previous query result from a .npy file instead of querying again
@@ -25,13 +26,8 @@ Optional flags:
 ####################
 
 def interpret_user_input():
-    # Variable that tracks the catalogue ID type
+    # Variable that tracks the catalog ID type
     cat_id_type = None
-
-    if len(sys.argv) < 2:
-        print("ERROR: Not enough arguments provided.")
-        print(USAGE_ERROR_MESSAGE)
-        sys.exit(1)
     
      # Check if the first argument is a file
     
@@ -41,7 +37,7 @@ def interpret_user_input():
         print(f"File extension detected: {file_extension}")
         file_path = sys.argv[1]
         
-        # Sets the catalogue ID type to the file extension initially (for later use)
+        # Sets the catalog ID type to the file extension initially (for later use)
         cat_id_type = file_extension
         
         # If there is no file, throw an error and exit
@@ -58,27 +54,34 @@ def interpret_user_input():
     
     # If there is no file extension found, assume direct input of one planet ID
     else:
+        # if len(sys.argv) < 3:
+        #     print("ERROR: Not enough arguments provided for single target.")
+        #     print(USAGE_ERROR_MESSAGE)
+        #     sys.exit(1)
+        
         cat_id_type = 'single'
 
-        try:
-            int(sys.argv[1])
-            print("ERROR: Invalid input format. If providing a single planet ID, ensure the last argument is the number part of the ID")
-            print("       and that the catalogue acronym is included.")
-            print(USAGE_ERROR_MESSAGE)
-            sys.exit(1)
-        except ValueError:
-            pass
+        # REMOVED THIS FUNCTIONALITY; Soem IDs are not simply ints
 
-        # Check if the last arg is an int
-        try:
-            int(sys.argv[-1])
-        except ValueError:
-            print("ERROR: Invalid input format. If providing a single planet ID, ensure the last argument is the number part of the ID")
-            print("       and that the catalogue acronym is included.")
-            print(USAGE_ERROR_MESSAGE)
-            sys.exit(1)
+        # # Checks that the 2nd given argument is an int (the ID)
+        # try:
+        #     int(sys.argv[1])
+        # except ValueError:
+        #     print("ERROR: Invalid input format. If providing a single planet ID, ensure the last argument is the number part of the ID")
+        #     print("       and that the catalog acronym is included.")
+        #     print(USAGE_ERROR_MESSAGE)
+        #     sys.exit(1)
 
-        # Create a dartaframe that holds the single planet ID and its catalogue type
+        # # Check if the last arg is an int
+        # try:
+        #     int(sys.argv[-1])
+        # except ValueError:
+        #     print("ERROR: Invalid input format. If providing a single planet ID, ensure the last argument is the number part of the ID")
+        #     print("       and that the catalog acronym is included.")
+        #     print(USAGE_ERROR_MESSAGE)
+        #     sys.exit(1)
+
+        # Create a dataframe that holds the single planet ID and its catalog type
         id_string = ""
 
         for arg in sys.argv[1:]:
@@ -91,28 +94,30 @@ def interpret_user_input():
 def validate_catalog_input():
 
     if len(sys.argv) < 2:
-        raise ValueError("No catalogue provided.")
-
-    valid_single_catalogs = {"HD", "TIC", "HIP"}
-
-    # Case 1: Gaia (needs DR3 or DR2)
-    if sys.argv[1].lower() == "gaia":
-        if len(sys.argv) < 3:
-            raise ValueError("Gaia must be followed by DR3.")
-        
-        if sys.argv[2].upper() not in {"DR3", "EDR3", "DR2"}:
-            raise ValueError("Gaia must be followed by DR2, EDR3, orDR3.")
-
-        return
-
-    # Case 2: HD, TIC, HIP
-    elif sys.argv[1].upper() in valid_single_catalogs:
-        return
-
+        raise ValueError("Input too short. Please privde a catalog acronym and ID.")
     else:
-        raise ValueError(
-            "Invalid catalogue. Must be one of: Gaia DR3, HD, TIC, or HIP."
-        )
+        return
+
+    # valid_single_catalogs = {"HD", "TIC", "HIP", "GJ", "2MASS"}
+
+    # # Case 1: Gaia (needs DR3 or DR2)
+    # if sys.argv[1].lower() == "gaia":
+    #     if len(sys.argv) < 3:
+    #         raise ValueError("Gaia must be followed by DR3.")
+        
+    #     if sys.argv[2].upper() not in {"DR3", "EDR3", "DR2"}:
+    #         raise ValueError("Gaia must be followed by DR2, EDR3, orDR3.")
+
+    #     return
+
+    # # Case 2: HD, TIC, HIP
+    # elif sys.argv[1].upper() in valid_single_catalogs:
+    #     return
+
+    # else:
+    #     raise ValueError(
+    #         "Invalid catalog. Must be one of: Gaia DR3, HD, TIC, or HIP."
+    #     )
 
 # Main execution
 if __name__ == "__main__":
@@ -146,21 +151,21 @@ if __name__ == "__main__":
             print(f"Error loading file: {e}")
             sys.exit(1)
 
-    # Interpret the command line arguments to obtain planet IDs and the catalogue ID type
+    # Interpret the command line arguments to obtain planet IDs and the catalog ID type
     else:
         planet_ids, cat_id_type = interpret_user_input()
 
-        # Check that one of the appropriate catalogue acronyms is in the sys.argv if the cat_id_type is single
+        # Check that one of the appropriate catalog acronyms is in the sys.argv if the cat_id_type is single
 
 
-        # If the user fed in a single planet ID, validate the associated catalogue acronym
+        # If the user fed in a single planet ID, validate the associated catalog acronym
         try:
             if cat_id_type == 'single':
-                # Check that sys.argv[1] is an acceptable catalogue acronym for simbad to locate
+                # Check that sys.argv[1] is an acceptable catalog acronym for simbad to locate
                 validate_catalog_input()
 
         except ValueError:
-            print("Error determining ID type. Please ensure you provide a valid ID or use the appropriate flag.")
+            print("Error determining ID. Please ensure you provide a valid ID.")
             print(USAGE_ERROR_MESSAGE)
             sys.exit(1)
 
@@ -258,6 +263,7 @@ if __name__ == "__main__":
     period_conversion_for_sem_maj_calculation = (period_days_1D_array/365.25)**(2/3)
 
     # Thus begins the for loop iterationg through the queried stellar data
+    # Contains the plotting functionality
     for star in query_result_df.itertuples(index=False):
         
         semi_major_axis_1D_array = utilities.semi_maj_axis_conversion(period_conversion_for_sem_maj_calculation, star.mass_flame)
